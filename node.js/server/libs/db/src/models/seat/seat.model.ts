@@ -20,6 +20,6 @@ export class Seat {
     max: string
     @ApiProperty({ description: '订单' })
     // 座位只允许有
-    @arrayProp({ itemsRef: 'Order',  })
+    @arrayProp({ itemsRef: 'Order'})
     coaches: Ref<Order>[]
 }

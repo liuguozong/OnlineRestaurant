@@ -56,7 +56,7 @@
                   <el-option label="超级会员" value="超级会员"></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="头像" :model="usersdata">
+              <el-form-item label="头像" :label-width="formLabelWidth">
                 <el-upload
                   class="avatar-uploader"
                   :action="BASEURL + 'upload'"
@@ -70,6 +70,7 @@
               </el-form-item>
               <el-form-item
                 label="性别"
+                :label-width="formLabelWidth"
               >
                 <el-radio v-model="usersdata.gender" label="男">男</el-radio>
                 <el-radio v-model="usersdata.gender" label="女">女</el-radio>
