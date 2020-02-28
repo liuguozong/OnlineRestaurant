@@ -1,6 +1,8 @@
-import { prop, modelOptions } from '@typegoose/typegoose'
+import { prop, modelOptions, arrayProp, Ref } from '@typegoose/typegoose'
 import { ApiProperty } from '@nestjs/swagger'
-
+import{User} from '../user/user.model' 
+import { Menu } from '../menu/menu.model'
+import { Seat } from '../seat/seat.model'
 @modelOptions({
     schemaOptions:{
         timestamps:true
@@ -9,10 +11,40 @@ import { ApiProperty } from '@nestjs/swagger'
 //增加时间戳//
 
 export class Order {
-    @ApiProperty({description:'名称'})
+    // 用户
+    @arrayProp({ itemsRef: 'User'})
+    name: Ref<User>[]
+    //选的菜品
+    @arrayProp({ itemsRef: 'Menu'})
+    list: Ref<Menu>[]
+    @arrayProp({ itemsRef: 'Seat'})
+    seat: Ref<Seat>[]
+    @ApiProperty({description:'评价'})
     @prop()
-    comment: string
-    @ApiProperty({description:'文件'})
+    evaluate: string
+    @ApiProperty({description:'图片'})
     @prop()
-    file: string
+    icon: string
+    @ApiProperty({description:'味道评分'})
+    @prop()
+    taste: string
+    @ApiProperty({description:'服务评分'})
+    @prop()
+    service: string
+    @ApiProperty({description:'环境评分'})
+    @prop()
+    surroundings: string
+    @ApiProperty({description:'当前状态'})
+    @prop()
+    state: string
+    @ApiProperty({description:'价格'})
+    @prop()
+    price: string
+    @ApiProperty({description:'支付方式'})
+    @prop()
+    mode: string
+    @ApiProperty({description:'备注'})
+    @prop()
+    remarks: string
 }
+

@@ -18,7 +18,7 @@
       <el-table-column prop="password" label="密码"></el-table-column>
       <el-table-column prop="phone" label="手机号"></el-table-column>
       <el-table-column align="right">
-        <template slot="header" slot-scope="scope">
+        <template slot="header">
           <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
         </template>
         <template slot-scope="scope">
@@ -177,13 +177,13 @@ export default {
   },
   methods: {
     async user() {
-      await userList().then((data) => {
+      userList().then((data) => {
         this.users = data.flat()
       })
     },
     // 编辑按钮
     async handleEdit(index, row, data) {
-      await userdata(`${row._id}`, data).then((data) => {
+      userdata(`${row._id}`, data).then((data) => {
         this.usersdata = data
         console.log(data)
       })

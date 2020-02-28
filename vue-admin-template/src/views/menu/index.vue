@@ -16,7 +16,7 @@
     <el-table-column prop="price" label="价钱"></el-table-column>
     <el-table-column align="right">
       <template slot="header" slot-scope="scope">
-        <el-button type="primary" @click="addmenu((dialogVisible = true))">主要按钮</el-button>
+        <el-button type="primary" @click="(addmenu,(dialogVisible = true))">主要按钮</el-button>
         <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
       </template>
       <template slot-scope="scope">
@@ -38,7 +38,7 @@
                 autocomplete="off"
                 clearable
                 style="width:200px"
-              ></el-input>
+              ><svg-icon slot="prefix" icon-class="huoguo" /></el-input>
             </el-form-item>
             <el-form-item label="类型">
               <el-cascader
@@ -65,7 +65,7 @@
                 clearable
                 placeholder="请输入菜品价格"
                 style="width:150px"
-              ></el-input>
+              ><svg-icon slot="prefix" icon-class="qianmoney" /></el-input>
             </el-form-item>
             <el-form-item label="标签">
               <el-input
@@ -173,13 +173,13 @@ export default {
   },
   methods: {
     async menu() {
-      await meunList().then((data) => {
+      meunList().then((data) => {
         this.menus = data.flat()
       })
     },
     // 编辑按钮
     async handleEdit(index, row, data) {
-      await menudata(`${row._id}`, data).then((data) => {
+      menudata(`${row._id}`, data).then((data) => {
         this.menusdata = data
         console.log(this.menusdata)
       })
@@ -220,6 +220,7 @@ export default {
                 type: 'success',
                 message: result.message
               })
+              this.menusdata = {}
             })
           } else {
             this.menu()
@@ -230,11 +231,12 @@ export default {
               })
             })
           }
-
+          this.menusdata = {}
           this.dialogVisible = false
         })
         .catch((_) => {
           this.dialogVisible = false
+          this.menusdata = {}
           this.$message({
             message: '放弃保存并离开页面'
           })
@@ -259,7 +261,8 @@ export default {
       return isJPG && isLt2M
     },
     async addmenu() {
-      console.log(this.dialogVisible)
+      this.menusdata = {}
+      console.log(1)
     }
   }
 }

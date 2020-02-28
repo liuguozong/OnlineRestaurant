@@ -29,7 +29,7 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: '显示所有用户' })
   async index() {
-    return [await this.model.find()]
+    return await this.model.find()
   }
 
   @Post()

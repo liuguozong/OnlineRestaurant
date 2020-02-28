@@ -18,8 +18,11 @@ export class Seat {
     @ApiProperty({description:'容纳人数'})
     @prop()
     max: string
+    @ApiProperty({description:'当前状态'})
+    @prop()
+    state: string
     @ApiProperty({ description: '订单' })
-    // 座位只允许有
+    // 座位只允许有一个订单
     @arrayProp({ itemsRef: 'Order'})
     coaches: Ref<Order>[]
 }

@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'user',
       name: 'user',
       component: () => import('@/views/user/index'),
-      meta: { title: '用户', icon: 'el-icon-s-custom' }
+      meta: { title: '用户', icon: 'yonghu' }
     }]
   },
   {
@@ -59,9 +59,29 @@ export const constantRoutes = [
     component: Layout,
     children: [{
       path: 'menus',
-      name: 'user',
+      name: 'menus',
       component: () => import('@/views/menu/index'),
       meta: { title: '菜单', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/orders',
+    component: Layout,
+    children: [{
+      path: 'orders',
+      name: 'orders',
+      component: () => import('@/views/order/index'),
+      meta: { title: '订单', icon: 'orders' }
+    }]
+  },
+  {
+    path: '/seats',
+    component: Layout,
+    children: [{
+      path: 'seats',
+      name: 'orders',
+      component: () => import('@/views/seat/index'),
+      meta: { title: '座位', icon: 'seat' }
     }]
   },
   {
