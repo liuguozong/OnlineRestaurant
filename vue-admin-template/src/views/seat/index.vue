@@ -25,17 +25,27 @@
           width="30%"
           :before-close="handleClose"
         >
-          {{ seatsdata }}
           <el-form :model="seatsdata">
-            <el-form-item label="座位名">
-              <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>
-            </el-form-item>
-            <el-form-item label="可容纳人数">
-              <el-input v-model="seatsdata.max" placeholder="可容纳人数"></el-input>
-            </el-form-item>
-            <el-form-item label="当前状态">
-              <el-input v-model="seatsdata.state" placeholder="当前状态"></el-input>
-            </el-form-item>
+            <el-tabs type="card">
+              <el-tab-pane label="座位信息">
+                <el-form-item label="座位名">
+                  <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>
+                </el-form-item>
+                <el-form-item label="可容纳人数">
+                  <el-input v-model="seatsdata.max" placeholder="可容纳人数"></el-input>
+                </el-form-item>
+                <el-form-item label="当前状态">
+                  <el-select v-model="seatsdata.state" placeholder="请选择状态">
+                    <el-option label="空闲" value="空闲"></el-option>
+                    <el-option label="预定" value="预定"></el-option>
+                    <el-option label="用餐中" value="用餐中"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-tab-pane>
+              <el-tab-pane label="订单详情">订单详情</el-tab-pane>
+            </el-tabs>
+            {{ seatsdata }}
+        
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="handleClose">取 消</el-button>

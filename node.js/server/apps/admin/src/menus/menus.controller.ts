@@ -16,7 +16,7 @@ export class MenusController {
   @Get()
   @ApiOperation({ summary: '显示所有菜品' })
   async index() {
-    return [await this.model.find()]
+    return await this.model.find()
   }
   @Post()
   @ApiOperation({ summary: '创建菜品' })

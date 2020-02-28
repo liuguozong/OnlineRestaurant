@@ -13,12 +13,12 @@ import { Seat } from '../seat/seat.model'
 export class Order {
     // 用户
     @arrayProp({ itemsRef: 'User'})
-    name: Ref<User>[]
+    user: Ref<User>[]
     //选的菜品
     @arrayProp({ itemsRef: 'Menu'})
-    list: Ref<Menu>[]
+    menus: Ref<Menu>[]
     @arrayProp({ itemsRef: 'Seat'})
-    seat: Ref<Seat>[]
+    seats: Ref<Seat>[]
     @ApiProperty({description:'评价'})
     @prop()
     evaluate: string

@@ -13,7 +13,7 @@ export class OrdersController {
   @Get()
   @ApiOperation({ summary: '显示所有订单' })
   async index() {
-    return await this.model.find()
+    return await this.model.find().populate('user').populate('menus').populate('seats')
   }
   @Post()
   @ApiOperation({ summary: '创建订单' })
@@ -26,7 +26,7 @@ export class OrdersController {
   @Get(':id')
   @ApiOperation({ summary: '订单详情' })
   async detail(@Param('id') id: string) {
-    return await this.model.findById(id).select('+password')
+    return await this.model.findById(id).populate('user').populate('seats')
   }
   @Put(':id')
   @ApiOperation({ summary: '编辑订单' })

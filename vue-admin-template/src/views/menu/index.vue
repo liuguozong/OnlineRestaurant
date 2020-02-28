@@ -174,7 +174,7 @@ export default {
   methods: {
     async menu() {
       meunList().then((data) => {
-        this.menus = data.flat()
+        this.menus = data
       })
     },
     // 编辑按钮

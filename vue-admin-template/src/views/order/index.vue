@@ -6,7 +6,7 @@
     style="width: 100%"
   >
     <el-table-column prop="_id" label="id"></el-table-column>
-    <el-table-column prop="name" label="用户名"></el-table-column>
+    <el-table-column prop="user.name" label="用户名"></el-table-column>
     <el-table-column prop="mode" label="支付方式"></el-table-column>
     <el-table-column prop="price" label="应付金额"></el-table-column>
     <el-table-column align="right">
@@ -24,10 +24,29 @@
           width="30%"
           :before-close="handleClose"
         >
-          {{ ordersdata }}
+          {{ o }} 
           <el-form v-model="ordersdata">
             <el-form-item label="用户">
-              <el-select v-model="ordersdata.name">
+              <el-input
+                v-model="o"
+                :disabled="true"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="座位"
+            >
+              <el-select v-model="ordersdata.seats" multiple>
+                <el-option
+                  v-for="item of seats"
+                  :key="item._id"
+                  :label="item.name"
+                  :value="item._id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="菜单">
+              <el-select v-model="ordersdata.menus" filterable multiple>
                 <el-option
                   v-for="item of menus"
                   :key="item._id"
@@ -39,8 +58,8 @@
             </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+            <el-button @click="handleClose">取 消</el-button>
+            <el-button type="primary" @click="handleClose">确 定</el-button>
           </span>
         </el-dialog>
 
@@ -53,7 +72,7 @@
 </template>
 
 <script>
-import { orderList, orderdata, orderedit, orderremove, ordereadd } from '@/api/order'
+import { orderList, orderdata, orderedit, orderremove } from '@/api/order'
 import { userList } from '@/api/user'
 import { meunList } from '@/api/menu'
 import { seatList } from '@/api/seat'
@@ -66,10 +85,11 @@ export default {
       users: [],
       menus: [],
       seats: [],
+      o: '',
       ordersdata: {
-        name: [],
-        list: [],
-        seat: [],
+        user: '',
+        menus: '',
+        seat: '',
         evaluate: '',
         icon: '',
         taste: '',
@@ -91,18 +111,21 @@ export default {
   methods: {
     async oreder() {
       orderList().then((data) => {
-        this.orders = data.flat()
+        this.orders = data
+        console.log(data)
       })
     },
     // 编辑按钮
     async handleEdit(index, row, data) {
       const res = await orderdata(`${row._id}`, data)
       this.ordersdata = Object.assign({}, this.ordersdata, res)
+      this.o = this.ordersdata.user[0]['name']
+      console.log(this.o)
       meunList().then((data) => {
-        this.menus = data
+        this.menus = data.flat(Infinity)
       })
       userList().then((data) => {
-        this.users = data
+        this.users = data.flat(Infinity)
       })
       seatList().then((data) => {
         this.seats = data
@@ -110,7 +133,7 @@ export default {
     },
     // 删除按钮
     handleDelete(index, row) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+      this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
@@ -136,26 +159,16 @@ export default {
     // 保存
     async handleClose() {
       this.$confirm('是否保存？')
-        .then((_) => {
-          if (this.ordersdata._id) {
-            orderedit(this.ordersdata._id, this.ordersdata).then((result) => {
-              this.$message({
-                type: 'success',
-                message: result.message
-              })
-              this.ordersdata = {}
-              this.oreder()
+        .then((_) => {       
+          this.ordersdata.user = this.o 
+          orderedit(this.ordersdata._id, this.ordersdata).then((result) => {
+            this.$message({
+              type: 'success',
+              message: result.message
             })
-          } else {
-            ordereadd(this.ordersdata).then((result) => {
-              this.$message({
-                type: 'success',
-                message: result.message
-              })
-            })
+            this.ordersdata = {}
             this.oreder()
-          }
-          this.ordersdata = {}
+          })
           this.dialogVisible = false
         })
         .catch((_) => {
@@ -164,6 +177,7 @@ export default {
           this.$message({
             message: '放弃保存并离开页面'
           })
+          console.log(this.ordersdata)
         })
     },
     async add() {
