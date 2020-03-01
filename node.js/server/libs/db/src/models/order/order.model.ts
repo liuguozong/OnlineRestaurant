@@ -1,8 +1,9 @@
 import { prop, modelOptions, arrayProp, Ref } from '@typegoose/typegoose'
 import { ApiProperty } from '@nestjs/swagger'
 import{User} from '../user/user.model' 
-import { Menu } from '../menu/menu.model'
 import { Seat } from '../seat/seat.model'
+import { Detailed } from '../detailed/detailed.model'
+import { Menu } from '../menu/menu.model'
 @modelOptions({
     schemaOptions:{
         timestamps:true
@@ -14,11 +15,15 @@ export class Order {
     // 用户
     @arrayProp({ itemsRef: 'User'})
     user: Ref<User>[]
-    //选的菜品
-    @arrayProp({ itemsRef: 'Menu'})
-    menus: Ref<Menu>[]
+     // 座位
     @arrayProp({ itemsRef: 'Seat'})
     seats: Ref<Seat>[]
+    //菜品ID
+    @arrayProp({ itemsRef: 'Menu'})
+    menus: Ref<Menu>[]
+   //  详细订单
+    @arrayProp({ itemsRef: 'Detailed'})
+    detailed: Ref<Detailed>[]
     @ApiProperty({description:'评价'})
     @prop()
     evaluate: string
@@ -37,9 +42,9 @@ export class Order {
     @ApiProperty({description:'当前状态'})
     @prop()
     state: string
-    @ApiProperty({description:'价格'})
+    @ApiProperty({description:'总价'})
     @prop()
-    price: string
+    total: string
     @ApiProperty({description:'支付方式'})
     @prop()
     mode: string

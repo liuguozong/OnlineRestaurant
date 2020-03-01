@@ -24,11 +24,13 @@ export class Menu {
     @ApiProperty({description:'价钱'})
     @prop()
     price: string
+    @ApiProperty({description:'数量'})
+    @prop()
+    number: number
     @ApiProperty({description:'标签'})
     @prop()
     label: string
     @ApiProperty({description:'描述'})
     @prop()
     depict : string
-
 }

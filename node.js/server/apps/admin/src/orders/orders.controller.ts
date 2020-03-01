@@ -18,15 +18,18 @@ export class OrdersController {
   @Post()
   @ApiOperation({ summary: '创建订单' })
   async create(@Body() createPostDto) {
-    await this.model.create(createPostDto)
+   const  res = await this.model.create(createPostDto)
     return {
-      success: true
+      success: true,
+      res
     }
   }
   @Get(':id')
   @ApiOperation({ summary: '订单详情' })
   async detail(@Param('id') id: string) {
-    return await this.model.findById(id).populate('user').populate('seats')
+    const  data= await this.model.findById(id).populate('user').populate('seats')
+    const  detailed= await this.model.findById(id).populate('menus').populate('detailed')
+    return { data,detailed}
   }
   @Put(':id')
   @ApiOperation({ summary: '编辑订单' })

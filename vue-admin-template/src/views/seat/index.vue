@@ -26,7 +26,7 @@
           :before-close="handleClose"
         >
           <el-form :model="seatsdata">
-            <el-tabs type="card">
+            <el-tabs type="card" name="1">
               <el-tab-pane label="座位信息">
                 <el-form-item label="座位名">
                   <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>

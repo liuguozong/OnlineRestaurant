@@ -38,3 +38,11 @@ export function ordereadd(data) {
     data
   })
 }
+//  新建订单详情
+export function detailedadd(data) {
+  return request({
+    url: `/detaileds`,
+    method: 'post',
+    data
+  })
+}

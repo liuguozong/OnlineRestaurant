@@ -5,8 +5,8 @@ import { User } from './models/user/user.model'
 import { Menu } from './models/menu/menu.model'
 import { Order } from './models/order/order.model'
 import { Seat } from './models/seat/seat.model'
-
-const models = TypegooseModule.forFeature([User, Menu, Order,Seat]) //引用模型//
+import { Detailed } from './models/detailed/detailed.model'
+const models = TypegooseModule.forFeature([User, Menu, Order,Seat,Detailed]) //引用模型//
 
 @Global() //设置为全局变量
 @Module({

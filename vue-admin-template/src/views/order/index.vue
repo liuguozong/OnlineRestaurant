@@ -6,12 +6,12 @@
     style="width: 100%"
   >
     <el-table-column prop="_id" label="id"></el-table-column>
-    <el-table-column prop="user.name" label="用户名"></el-table-column>
+    <el-table-column prop="user[]['name']" label="用户名"></el-table-column>
     <el-table-column prop="mode" label="支付方式"></el-table-column>
     <el-table-column prop="price" label="应付金额"></el-table-column>
     <el-table-column align="right">
       <template slot="header">
-        <el-button type="primary" @click="(add,(dialogVisible = true))">主要按钮</el-button>
+        <el-button type="primary" @click="(dialogVisible = true)">主要按钮</el-button>
         <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
       </template>
       <template slot-scope="scope">
@@ -25,7 +25,7 @@
           :before-close="handleClose"
         >
           {{ o }} 
-          <el-form v-model="ordersdata">
+          <el-form v-model="o">
             <el-form-item label="用户">
               <el-input
                 v-model="o"
@@ -45,8 +45,14 @@
                 </el-option>
               </el-select>
             </el-form-item>
+            {{ ordersdata.menus }}
             <el-form-item label="菜单">
-              <el-select v-model="ordersdata.menus" filterable multiple>
+              <el-select 
+                v-model="ordersdata.menus"
+                filterable
+                multiple
+                collapse-tags
+              >
                 <el-option
                   v-for="item of menus"
                   :key="item._id"
@@ -56,6 +62,43 @@
                 </el-option>
               </el-select>
             </el-form-item>
+            <el-collapse>
+              <el-collapse-item title="菜单详情">
+                {{ detailed }}
+                <template>
+                  <el-table
+                    :data="detailed"
+                    style="width: 100%"
+                  >
+                    <el-table-column
+                      prop="name"
+                      label="名字"
+                      width="100"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                      prop="price"
+                      label="单价"
+                      width="100"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                      label="数量"
+                      width="180"
+                    >
+                      <template slot-scope="scope">
+                        <el-input-number 
+                          v-model="scope.row.number" 
+                          size="mini"
+                          :min="1"
+                          :max="10" 
+                        ></el-input-number>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </template>
+              </el-collapse-item>
+            </el-collapse>
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="handleClose">取 消</el-button>
@@ -69,10 +112,9 @@
       </template>
     </el-table-column>
   </el-table>
-</template>
-
+</template> 
 <script>
-import { orderList, orderdata, orderedit, orderremove } from '@/api/order'
+import { orderList, orderdata, orderedit, orderremove, detailedadd } from '@/api/order'
 import { userList } from '@/api/user'
 import { meunList } from '@/api/menu'
 import { seatList } from '@/api/seat'
@@ -85,7 +127,11 @@ export default {
       users: [],
       menus: [],
       seats: [],
+      menu: [],
+      detailed: [],
+      detaileds: [],
       o: '',
+      sum: '',
       ordersdata: {
         user: '',
         menus: '',
@@ -118,9 +164,13 @@ export default {
     // 编辑按钮
     async handleEdit(index, row, data) {
       const res = await orderdata(`${row._id}`, data)
-      this.ordersdata = Object.assign({}, this.ordersdata, res)
-      this.o = this.ordersdata.user[0]['name']
-      console.log(this.o)
+      this.ordersdata = Object.assign({}, this.ordersdata, res.data)
+      console.log(this.ordersdata)
+      this.menu = res.detailed.menus
+      console.log(1)
+      console.log(res.detailed.detailed[0]['menu'])
+      this.detailed = res.detailed.detailed[0]['menu']
+      this.$set(this.detailed, 'number', '')
       meunList().then((data) => {
         this.menus = data.flat(Infinity)
       })
@@ -130,6 +180,7 @@ export default {
       seatList().then((data) => {
         this.seats = data
       })
+      console.log(this.o = this.ordersdata.user[0]['name'])
     },
     // 删除按钮
     handleDelete(index, row) {
@@ -160,7 +211,6 @@ export default {
     async handleClose() {
       this.$confirm('是否保存？')
         .then((_) => {       
-          this.ordersdata.user = this.o 
           orderedit(this.ordersdata._id, this.ordersdata).then((result) => {
             this.$message({
               type: 'success',
@@ -181,7 +231,22 @@ export default {
         })
     },
     async add() {
-      console.log(1)
+      this.menu.forEach(item => {
+        this.detaileds.push({
+          _id: item._id,
+          name: item.name,
+          icon: item.icon,
+          number: item.number,
+          price: item.price,
+          total: item.total
+        })
+      });
+      this.detailed[0]['order'] = this.ordersdata._id
+      this.detailed[0]['menu'] = this.detaileds
+      const res = await detailedadd(this.detailed)
+      console.log(res[0]._id)
+      this.ordersdata.detailed = res[0]._id
+      orderedit(this.ordersdata._id, this.ordersdata)
     }
   }
 }

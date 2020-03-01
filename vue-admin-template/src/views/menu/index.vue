@@ -8,6 +8,7 @@
     <el-table-column prop="_id" label="id"></el-table-column>
     <el-table-column prop="name" label="菜名"></el-table-column>
     <el-table-column prop="genre" label="类别"></el-table-column>
+    <el-table-column prop="genre" label="数量"></el-table-column>
     <el-table-column prop="icon" label="图片">
       <template slot-scope="scope">
         <img :src="scope.row.icon" style="height:3em;" />
@@ -15,7 +16,7 @@
     </el-table-column>
     <el-table-column prop="price" label="价钱"></el-table-column>
     <el-table-column align="right">
-      <template slot="header" slot-scope="scope">
+      <template slot="header">
         <el-button type="primary" @click="(addmenu,(dialogVisible = true))">主要按钮</el-button>
         <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
       </template>
@@ -113,7 +114,8 @@ export default {
         genre: '',
         price: '',
         label: '',
-        depict: ''
+        depict: '',
+        number: '1'
       },
       search: '',
       dialogVisible: false, // 是否打开用户详情
@@ -179,10 +181,9 @@ export default {
     },
     // 编辑按钮
     async handleEdit(index, row, data) {
-      menudata(`${row._id}`, data).then((data) => {
-        this.menusdata = data
-        console.log(this.menusdata)
-      })
+      const res = await menudata(`${row._id}`, data)
+      this.menusdata = Object.assign({}, this.menusdata, res)
+      console.log(this.menusdata)
     },
     // 删除按钮
     handleDelete(index, row) {
@@ -212,23 +213,24 @@ export default {
     // 保存
     async handleClose() {
       this.$confirm('是否保存？')
-        .then((_) => {
-          this.menu()
+        .then((_) => {   
           if (this.menusdata._id) {
             menuedit(this.menusdata._id, this.menusdata).then((result) => {
               this.$message({
                 type: 'success',
                 message: result.message
               })
+              this.menu()
+              this.dialogVisible = false
               this.menusdata = {}
             })
           } else {
-            this.menu()
             menuadd(this.menusdata).then((result) => {
               this.$message({
                 type: 'success',
                 message: result.message
               })
+              this.menu()
             })
           }
           this.menusdata = {}

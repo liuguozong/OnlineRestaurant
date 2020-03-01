@@ -9,6 +9,7 @@ import { CommonModule } from '0/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { OrdersModule } from './orders/orders.module';
 import { SeatsModule } from './seats/seats.module';
+import { DetailedsModule } from './detaileds/detaileds.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SeatsModule } from './seats/seats.module';
     AuthModule,
     OrdersModule,
     SeatsModule,
+    DetailedsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
