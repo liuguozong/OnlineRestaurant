@@ -39,3 +39,10 @@ export function menuadd(data) {
     data
   })
 }
+export function term(data) {
+  return request({
+    url: `/menus/term`,
+    method: 'gat',
+    data
+  })
+}

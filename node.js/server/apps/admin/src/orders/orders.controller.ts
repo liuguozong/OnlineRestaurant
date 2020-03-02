@@ -27,8 +27,8 @@ export class OrdersController {
   @Get(':id')
   @ApiOperation({ summary: '订单详情' })
   async detail(@Param('id') id: string) {
-    const  data= await this.model.findById(id).populate('user').populate('seats')
-    const  detailed= await this.model.findById(id).populate('menus').populate('detailed')
+    const  data= await this.model.findById(id).populate('user')
+    const  detailed= await this.model.findById(id).populate('menus').populate('detailed').populate('seats')
     return { data,detailed}
   }
   @Put(':id')
@@ -57,6 +57,18 @@ export class OrdersController {
       }
     } catch (error) {
       throw new HttpException({ message: '删除失败' }, 500)
+    }
+  }
+  @Put(':id')
+  @ApiOperation({ summary: '增加' })
+  async increase(@Param('id') id: string, @Body() updatePostDto) {
+    try {
+        await this.model.findByIdAndUpdate(id, updatePostDto)
+      return {
+        message: '修改成功'
+      }
+    } catch (error) {
+      throw new HttpException({ message: '修改失败' }, 500)
     }
   }
 }

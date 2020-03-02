@@ -46,3 +46,10 @@ export function detailedadd(data) {
     data
   })
 }
+export function detaileddit(id, data) {
+  return request({
+    url: `/detaileds/${id}`,
+    method: 'put',
+    data
+  })
+}
