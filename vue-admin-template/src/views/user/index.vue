@@ -36,7 +36,7 @@
             center
           >
             {{ usersdata }}
-            <el-form :model="usersdata">
+            <el-form :v-model="usersdata">
               <el-form-item label="用户名" :label-width="formLabelWidth">
                 <el-input
                   v-model="usersdata.username"
@@ -75,7 +75,7 @@
                 <el-radio v-model="usersdata.gender" label="男">男</el-radio>
                 <el-radio v-model="usersdata.gender" label="女">女</el-radio>
               </el-form-item>  
-              <el-form :model="usersdata" label-width="100px">
+              <el-form :v-model="usersdata" label-width="100px">
                 <el-form-item
                   prop="password"
                   label="密码"

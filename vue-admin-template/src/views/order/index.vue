@@ -18,7 +18,12 @@
     <el-table-column align="right">
       <template slot="header">
         <el-button type="primary" @click="dialogVisible = true">主要按钮</el-button>
-        <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
+        <el-input
+          v-model="search" 
+          size="mini"
+          placeholder="输入关键字搜索" 
+          clearable
+        />
       </template>
       <template slot-scope="scope">
         <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
@@ -54,9 +59,9 @@
                     filterable
                     multiple
                     collapse-tags
+                    clearable
                     placeholder="请选择添加菜品"
                     @visible-change="input($event)"
-                    @remove-tag="sc"
                   >
                     <el-option
                       v-for="item of add"
@@ -86,6 +91,15 @@
                         ></el-input-number>
                       </template>
                     </el-table-column>
+                    <el-table-column label="操作">
+                      <template slot-scope="scope">
+                        <el-button
+                          size="mini"
+                          type="danger"
+                          @click="detailedDelete(scope.$index, scope.row)"
+                        >删除</el-button>
+                      </template>
+                    </el-table-column>
                   </el-table>
                 </template>
               </el-collapse-item>
@@ -107,7 +121,7 @@
 <script>
 import { orderList, orderdata, orderedit, orderremove, detailedadd, detaileddit } from '@/api/order'
 import { userList } from '@/api/user'
-import { meunList, term } from '@/api/menu'
+import { meunList } from '@/api/menu'
 import { seatList } from '@/api/seat'
 import request from '@/utils/request'
 export default {
@@ -279,16 +293,26 @@ export default {
           this.detailed.push({
             _id: item._id,
             name: item.name,
-            icon: item.icon,
             number: 1,
             price: item.price
           })
         })
+        this.newly = []
         console.log('离开', callback)
       }
     },
-    sc() {
-      console.log('正在取消值')
+    async detailedDelete(index, row) {
+      this.detailed = await this.detailed.filter((item) => {
+        if (row._id.indexOf(item._id) === -1) {
+          return item
+        }
+      })
+      this.ordersdata.menus = await this.ordersdata.menus.filter((item) => {
+        if (row._id.indexOf(item) === -1) {
+          return item
+        }
+        console.log(item)
+      })
     }
   }
 }

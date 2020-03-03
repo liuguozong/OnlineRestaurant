@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 获取全部菜品
-export function meunList(data) {
+export function meunList(query) {
   return request({
     url: '/menus',
     method: 'get',
-    data
+    params: query
   })
 }
 // 获取菜品信息
@@ -36,13 +36,6 @@ export function menuadd(data) {
   return request({
     url: `/menus`,
     method: 'post',
-    data
-  })
-}
-export function term(data) {
-  return request({
-    url: `/menus/term`,
-    method: 'gat',
     data
   })
 }

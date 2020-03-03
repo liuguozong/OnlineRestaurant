@@ -1,103 +1,123 @@
 <template>
-  <el-table
-    :data="
-      menus.filter((menus) => !search || menus.name.toLowerCase().includes(search.toLowerCase()))
-    "
-    style="width: 100%"
-  >
-    <el-table-column prop="_id" label="id"></el-table-column>
-    <el-table-column prop="name" label="菜名"></el-table-column>
-    <el-table-column prop="genre" label="类别"></el-table-column>
-    <el-table-column prop="genre" label="数量"></el-table-column>
-    <el-table-column prop="icon" label="图片">
-      <template slot-scope="scope">
-        <img :src="scope.row.icon" style="height:3em;" />
-      </template>
-    </el-table-column>
-    <el-table-column prop="price" label="价钱"></el-table-column>
-    <el-table-column align="right">
-      <template slot="header">
-        <el-button type="primary" @click="(addmenu,(dialogVisible = true))">主要按钮</el-button>
-        <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
-      </template>
-      <template slot-scope="scope">
-        <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
-          Edit
-        </el-button>
-        <el-dialog
-          :title="!menusdata._id ? '新增菜单' : '修改菜单'"
-          :visible.sync="dialogVisible"
-          width="30%"
-          :before-close="handleClose"
-          center
-        >
-          {{ menusdata }}
-          <el-form :model="menusdata">
-            <el-form-item label="名称">
-              <el-input
-                v-model="menusdata.name"
-                autocomplete="off"
-                clearable
-                style="width:200px"
-              ><svg-icon slot="prefix" icon-class="huoguo" /></el-input>
-            </el-form-item>
-            <el-form-item label="类型">
-              <el-cascader
-                v-model="menusdata.genre"
-                :options="options"
-                placeholder="类型"
-              ></el-cascader>
-            </el-form-item>
-            <el-form-item label="图片" :model="menusdata">
-              <el-upload
-                class="avatar-uploader"
-                :action="BASEURL + 'upload'"
-                :show-file-list="false"
-                :on-success="handleAvatarSuccess"
-                :before-upload="beforeAvatarUpload"
-              >
-                <img v-if="menusdata.avatar" :src="menusdata.avatar" class="avatar" />
-                <i v-else class="el-icon-plus avatar-uploader-icon" />
-              </el-upload>
-            </el-form-item>
-            <el-form-item label="价格">
-              <el-input
-                v-model="menusdata.price"
-                clearable
-                placeholder="请输入菜品价格"
-                style="width:150px"
-              ><svg-icon slot="prefix" icon-class="qianmoney" /></el-input>
-            </el-form-item>
-            <el-form-item label="标签">
-              <el-input
-                v-model="menusdata.label"
-                type="textarea"
-                autosize
-                placeholder="请输入菜品标签"
-                style="width:400px"
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="描述">
-              <el-input
-                v-model="menusdata.depict"
-                type="textarea"
-                autosize
-                placeholder="请输入菜品描述"
-                style="width:400px"
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="handleClose">取 消</el-button>
-            <el-button type="primary" @click="handleClose">确 定</el-button>
-          </span>
-        </el-dialog>
-        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-          Delete
-        </el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  <div>
+    <el-table
+      :data="menus"
+      style="width: 100%"
+    >
+      <el-table-column prop="_id" label="id"></el-table-column>
+      <el-table-column prop="name" label="菜名"></el-table-column>
+      <el-table-column prop="genre" label="类别"></el-table-column>
+      <el-table-column prop="genre" label="数量"></el-table-column>
+      <el-table-column prop="icon" label="图片">
+        <template slot-scope="scope">
+          <img :src="scope.row.icon" style="height:3em;" />
+        </template>
+      </el-table-column>
+      <el-table-column prop="price" label="价钱"></el-table-column>
+      <el-table-column align="right">
+        <template slot="header" slot-scope="scope">
+          <el-button type="primary" @click="(addmenu,(dialogVisible = true))">主要按钮</el-button>
+          <el-input
+            v-model="query.key" 
+            icon="el-icon-search"
+            size="mini"
+            placeholder="输入关键字搜索" 
+            clearable
+            @blur="searchMethod"
+          />
+        </template>
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
+            Edit
+          </el-button>
+          <el-dialog
+            :title="!menusdata._id ? '新增菜单' : '修改菜单'"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose"
+            center
+          >
+            {{ menusdata }}
+            <el-form :v-model="menusdata">
+              <el-form-item label="名称">
+                <el-input
+                  v-model="menusdata.name"
+                  autocomplete="off"
+                  clearable
+                  style="width:200px"
+                ><svg-icon slot="prefix" icon-class="huoguo" /></el-input>
+              </el-form-item>
+              <el-form-item label="类型">
+                <el-cascader
+                  v-model="menusdata.genre"
+                  :options="options"
+                  placeholder="类型"
+                ></el-cascader>
+              </el-form-item>
+              <el-form-item label="图片" :label-width="formLabelWidth">
+                <el-upload
+                  class="avatar-uploader"
+                  :action="BASEURL + 'upload'"
+                  :show-file-list="false"
+                  :on-success="handleAvatarSuccess"
+                  :before-upload="beforeAvatarUpload"
+                >
+                  <img v-if="menusdata.icon" :src="menusdata.icon" class="avatar" />
+                  <i v-else class="el-icon-plus avatar-uploader-icon" />
+                </el-upload>
+              </el-form-item>
+              <el-form-item label="价格">
+                <el-input
+                  v-model="menusdata.price"
+                  clearable
+                  placeholder="请输入菜品价格"
+                  style="width:150px"
+                ><svg-icon slot="prefix" icon-class="qianmoney" /></el-input>
+              </el-form-item>
+              <el-form-item label="标签">
+                <el-input
+                  v-model="menusdata.label"
+                  type="textarea"
+                  autosize
+                  placeholder="请输入菜品标签"
+                  style="width:400px"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="描述">
+                <el-input
+                  v-model="menusdata.depict"
+                  type="textarea"
+                  autosize
+                  placeholder="请输入菜品描述"
+                  style="width:400px"
+                ></el-input>
+              </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="handleClose">取 消</el-button>
+              <el-button type="primary" @click="handleClose">确 定</el-button>
+            </span>
+          </el-dialog>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
+            Delete
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-footer>
+      <el-row type="flex" justify="center">
+        <el-col :span="6">
+          <el-pagination
+            style="margin-bottom:15px"
+            align="center"
+            layout="prev, pager, next"
+            :total="page.count"
+            @current-change="changePage"
+          />
+        </el-col>
+      </el-row>
+    </el-footer>
+  </div>
 </template>
 
 <script>
@@ -117,6 +137,18 @@ export default {
         depict: '',
         number: '1'
       },
+      query: {
+        key: '',
+        limit: 10,
+        page: 1,
+        sort: ''
+      },
+      page: {
+        limit: 10,
+        count: 0,
+        page: 1
+      },
+      total: 0,
       search: '',
       dialogVisible: false, // 是否打开用户详情
       formLabelWidth: '120px',
@@ -171,14 +203,9 @@ export default {
     }
   },
   created() {
-    this.menu()
+    this.fetchmenu()
   },
   methods: {
-    async menu() {
-      meunList().then((data) => {
-        this.menus = data
-      })
-    },
     // 编辑按钮
     async handleEdit(index, row, data) {
       const res = await menudata(`${row._id}`, data)
@@ -195,7 +222,7 @@ export default {
       })
         .then(() => {
           menuremove(`${row._id}`).then((result) => {
-            this.menu()
+            this.fetchmenu()
             console.log(result.message)
             this.$message({
               type: 'success',
@@ -220,7 +247,7 @@ export default {
                 type: 'success',
                 message: result.message
               })
-              this.menu()
+              this.fetchmenu()
               this.dialogVisible = false
               this.menusdata = {}
             })
@@ -230,7 +257,7 @@ export default {
                 type: 'success',
                 message: result.message
               })
-              this.menu()
+              this.fetchmenu()
             })
           }
           this.menusdata = {}
@@ -246,12 +273,11 @@ export default {
     },
     // 菜品图片上传控件
     handleAvatarSuccess(res, file) {
-      this.$set(this.usersdata, 'avatar', res)
+      this.$set(this.menusdata, 'icon', res)
       this.$message.success('上传成功!')
-      console.log(this.usersdata.avatar)
     },
     beforeAvatarUpload(file) {
-      const isJPG = file.type === 'image/jpeg'
+      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png')
       const isLt2M = file.size / 1024 / 1024 < 2
 
       if (!isJPG) {
@@ -265,6 +291,31 @@ export default {
     async addmenu() {
       this.menusdata = {}
       console.log(1)
+    },
+    // 分页
+    changePage(val) {
+      this.query.page = val
+      console.log('当前页：', val, 'query数据：', this.query)
+      this.fetchmenu(this.query)
+    },
+    // 获取所有用户加分页加查询
+    fetchmenu(query) {
+      console.log(query)
+      meunList(this.query).then((response) => {
+        this.menus = response.list
+        this.page.count = response.count
+      })
+    },
+    // 搜索
+    async searchMethod() {
+      const query = Object.assign({}, this.query)
+      const res = await meunList(query)
+      if (res) {
+        this.menus = res.list
+        this.page.count = res.count
+      } else {
+        this.$message.info('请检查输入内容')
+      }
     }
   }
 }
