@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 获取座位
-export function seatList(data) {
+export function seatList(query) {
   return request({
     url: '/seats',
     method: 'get',
-    data
+    params: query
   })
 }
 // 获取座位信息

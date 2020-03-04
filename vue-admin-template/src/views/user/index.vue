@@ -2,7 +2,7 @@
   <div>
     {{ users }}
     <el-table
-      :data="users.filter(users => !search || users.username.toLowerCase() .includes(search.toLowerCase()))"
+      :data="users"
       style="width: 100%"
     >
       <el-table-column prop="_id" label="id"></el-table-column>
@@ -18,8 +18,16 @@
       <el-table-column prop="password" label="密码"></el-table-column>
       <el-table-column prop="phone" label="手机号"></el-table-column>
       <el-table-column align="right">
-        <template slot="header">
-          <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
+        <template slot="header" slot-scope="scope">
+          <el-input
+            v-model="query.key" 
+            icon="el-icon-search"
+            size="mini"
+            placeholder="输入关键字搜索" 
+            clearable
+            @blur="searchMethod"
+            @clear="searchMethod"
+          />>
         </template>
         <template slot-scope="scope">
           <el-button
@@ -117,6 +125,19 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-footer>
+      <el-row type="flex" justify="center">
+        <el-col :span="6">
+          <el-pagination
+            style="margin-bottom:15px"
+            align="center"
+            layout="prev, pager, next"
+            :total="page.count"
+            @current-change="changePage"
+          />
+        </el-col>
+      </el-row>
+    </el-footer>
   </div>
 </template>
 <script>
@@ -167,6 +188,17 @@ export default {
         password: '', // 密码
         email: '', // 邮箱
         phone: '' // 手机号
+      },
+      query: {
+        key: '',
+        limit: 10,
+        page: 1,
+        sort: ''
+      },
+      page: {
+        limit: 10,
+        count: 0,
+        page: 1
       }
     }
   },
@@ -177,9 +209,26 @@ export default {
   },
   methods: {
     async user() {
-      userList().then((data) => {
-        this.users = data.flat()
+      userList(this.query).then((response) => {
+        this.users = response.list
+        this.page.count = response.count
       })
+    },
+    changePage(val) {
+      this.query.page = val
+      console.log('当前页：', val, 'query数据：', this.query)
+      this.fetchmenu(this.query)
+    },
+    // 搜索
+    async searchMethod() {
+      const query = Object.assign({}, this.query)
+      const res = await userList(query)
+      if (res) {
+        this.users = res.list
+        this.page.count = res.count
+      } else {
+        this.$message.info('请检查输入内容')
+      }
     },
     // 编辑按钮
     async handleEdit(index, row, data) {

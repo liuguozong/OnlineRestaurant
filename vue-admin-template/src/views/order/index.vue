@@ -1,122 +1,143 @@
 <template>
-  <el-table
-    :data="
-      orders.filter((orders) => !search || orders.name.toLowerCase().includes(search.toLowerCase()))
-    "
-    style="width: 100%"
-  >
-    <el-table-column prop="_id" label="id"></el-table-column>
-    <el-table-column label="用户名">
-      <template slot-scope="scope">
-        <span v-for="item in scope.row.user" :key="item._id" :value="item.name" :prop="item.name">
-          {{ item.name }}
-        </span>
-      </template>
-    </el-table-column>
-    <el-table-column prop="mode" label="支付方式"></el-table-column>
-    <el-table-column prop="price" label="应付金额"></el-table-column>
-    <el-table-column align="right">
-      <template slot="header">
-        <el-button type="primary" @click="dialogVisible = true">主要按钮</el-button>
-        <el-input
-          v-model="search" 
-          size="mini"
-          placeholder="输入关键字搜索" 
-          clearable
-        />
-      </template>
-      <template slot-scope="scope">
-        <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
-          Edit
-        </el-button>
-        <el-dialog
-          title="提示"
-          :visible.sync="dialogVisible"
-          width="30%"
-          :before-close="handleClose"
-        >
-          {{ ordersdata.seats }}
-          <el-form v-model="o">
-            <el-form-item label="用户">
-              <el-input v-model="o" :disabled="true"></el-input>
-            </el-form-item>
-            <el-form-item label="座位">
-              <el-select v-model="ordersdata.seats" multiple>
-                <el-option
-                  v-for="item of seats"
-                  :key="item._id"
-                  :label="item.name"
-                  :value="item._id"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-collapse>
-              <el-collapse-item title="菜单详情">
-                {{ ordersdata.menus }}
-                <el-form-item label="菜单">
-                  <el-select
-                    v-model="newly"
-                    filterable
-                    multiple
-                    collapse-tags
-                    clearable
-                    placeholder="请选择添加菜品"
-                    @visible-change="input($event)"
-                  >
-                    <el-option
-                      v-for="item of add"
-                      :key="item._id"
-                      :label="item.name"
-                      :value="item._id"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                {{ detailed }}
-                <template>
-                  <el-table
-                    :data="detailed"
-                    style="width: 100%"
-                    :summary-method="getSummaries"
-                    show-summary
-                  >
-                    <el-table-column prop="name" label="名字" width="100"></el-table-column>
-                    <el-table-column prop="price" label="单价" width="100"></el-table-column>
-                    <el-table-column label="数量" width="180">
-                      <template slot-scope="scope">
-                        <el-input-number
-                          v-model="scope.row.number"
-                          size="mini"
-                          :min="1"
-                          :max="10"
-                        ></el-input-number>
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="操作">
-                      <template slot-scope="scope">
-                        <el-button
-                          size="mini"
-                          type="danger"
-                          @click="detailedDelete(scope.$index, scope.row)"
-                        >删除</el-button>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                </template>
-              </el-collapse-item>
-            </el-collapse>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="handleClose">取 消</el-button>
-            <el-button type="primary" @click="handleClose">确 定</el-button>
+  <div>
+    <el-table
+      :data="orders"
+      style="width: 100%"
+    >
+      <el-table-column prop="_id" label="id"></el-table-column>
+      <el-table-column label="用户名">
+        <template slot-scope="scope">
+          <span
+            v-for="item in scope.row.user" 
+            :key="item._id" 
+            :value="item.name" 
+            :prop="item.name"
+          >
+            {{ item.name }}
           </span>
-        </el-dialog>
+        </template>
+      </el-table-column>
+      <el-table-column prop="mode" label="支付方式"></el-table-column>
+      <el-table-column prop="price" label="应付金额"></el-table-column>
+      <el-table-column align="right">
+        <template slot="header" slot-scope="scope">
+          <el-button type="primary" @click="dialogVisible = true">主要按钮</el-button>
+          <el-input
+            v-model="query.key" 
+            icon="el-icon-search"
+            size="mini"
+            placeholder="输入关键字搜索" 
+            clearable
+            @blur="searchMethod"
+            @clear="searchMethod"
+          />
+        </template>
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
+            Edit
+          </el-button>
+          <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose"
+          >
+            {{ ordersdata.seats }}
+            <el-form v-model="o">
+              <el-form-item label="用户">
+                <el-input v-model="o" :disabled="true"></el-input>
+              </el-form-item>
+              <el-form-item label="座位">
+                <el-select v-model="ordersdata.seats" multiple>
+                  <el-option
+                    v-for="item of seats"
+                    :key="item._id"
+                    :label="item.name"
+                    :value="item._id"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-collapse>
+                <el-collapse-item title="菜单详情">
+                  {{ ordersdata.menus }}
+                  <el-form-item label="菜单">
+                    <el-select
+                      v-model="newly"
+                      filterable
+                      multiple
+                      collapse-tags
+                      clearable
+                      placeholder="请选择添加菜品"
+                      @visible-change="input($event)"
+                    >
+                      <el-option
+                        v-for="item of add"
+                        :key="item._id"
+                        :label="item.name"
+                        :value="item._id"
+                      ></el-option>
+                    </el-select>
+                  </el-form-item>
+                  {{ detailed }}
+                  <template>
+                    <el-table
+                      :data="detailed"
+                      style="width: 100%"
+                      :summary-method="getSummaries"
+                      show-summary
+                    >
+                      <el-table-column prop="name" label="名字" width="100"></el-table-column>
+                      <el-table-column prop="price" label="单价" width="100"></el-table-column>
+                      <el-table-column label="数量" width="180">
+                        <template slot-scope="scope">
+                          <el-input-number
+                            v-model="scope.row.number"
+                            size="mini"
+                            :min="1"
+                            :max="10"
+                          ></el-input-number>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="操作">
+                        <template slot-scope="scope">
+                          <el-button
+                            size="mini"
+                            type="danger"
+                            @click="detailedDelete(scope.$index, scope.row)"
+                          >删除</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </template>
+                </el-collapse-item>
+              </el-collapse>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="handleClose">取 消</el-button>
+              <el-button type="primary" @click="handleClose">确 定</el-button>
+            </span>
+          </el-dialog>
 
-        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-          Delete
-        </el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
+            Delete
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-footer>
+      <el-row type="flex" justify="center">
+        <el-col :span="6">
+          <el-pagination
+            style="margin-bottom:15px"
+            align="center"
+            layout="prev, pager, next"
+            :total="page.count"
+            @current-change="changePage"
+          />
+        </el-col>
+      </el-row>
+    </el-footer>
+  </div>
 </template>
 <script>
 import { orderList, orderdata, orderedit, orderremove, detailedadd, detaileddit } from '@/api/order'
@@ -139,6 +160,17 @@ export default {
       add: [],
       zj: [],
       newly: [],
+      query: {
+        key: '',
+        limit: 10,
+        page: 1,
+        sort: ''
+      },
+      page: {
+        limit: 10,
+        count: 0,
+        page: 1
+      },
       o: '',
       ordersdata: {
         user: '',
@@ -164,10 +196,27 @@ export default {
   },
   methods: {
     async oreder() {
-      orderList().then((data) => {
-        this.orders = data
-        console.log('获取的所有订单数据', data)
+      orderList(this.query).then((response) => {
+        this.orders = response.list
+        this.page.count = response.count
       })
+    },
+    // 分页
+    changePage(val) {
+      this.query.page = val
+      console.log('当前页：', val, 'query数据：', this.query)
+      this.oreder(this.query)
+    },
+    // 搜索
+    async searchMethod() {
+      const query = Object.assign({}, this.query)
+      const res = await orderList(query)
+      if (res) {
+        this.orders = res.list
+        this.page.count = res.count
+      } else {
+        this.$message.info('请检查输入内容')
+      }
     },
     // 编辑按钮
     async handleEdit(index, row, data) {

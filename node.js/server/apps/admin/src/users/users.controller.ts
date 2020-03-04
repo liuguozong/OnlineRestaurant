@@ -8,7 +8,8 @@ import {
   Put,
   Param,
   Delete,
-  HttpException
+  HttpException,
+  Query
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty } from 'class-validator'
@@ -28,8 +29,69 @@ export class UsersController {
   constructor(@InjectModel(User) private readonly model) {}
   @Get()
   @ApiOperation({ summary: '显示所有用户' })
-  async index() {
-    return await this.model.find()
+  async index(@Query() query) {
+    let sort = query.sort || '',
+            page = query.page,
+            limit = Number(query.limit) || 10,
+            key = query.key || '',
+            reg = new RegExp(key, 'i'), // 不区分大小写
+            count = (await this.model.find()).length,
+            list: any = []
+
+        const _options = {
+            $or: [
+                { name: { $regex: reg } },
+                { email: { $regex: reg } },
+                { phone: { $regex: reg } },
+                { gender: { $regex: reg } },
+                { gradae: { $regex: reg } }
+            ]
+        }
+
+        if (sort && limit && key) {
+            list = await this.model.find(_options)
+                .skip((page - 1) * 10)
+                .limit(limit)
+                .sort({ createdAt: sort })
+            count = list.length
+            return {
+                list,
+                count
+            }
+        }
+
+        if (key) {
+            list = await this.model.find(_options)
+                .exec()
+            count = list.length
+            console.log(key, reg, list.length)
+            return {
+                list,
+                count
+            }
+        }
+
+        if (sort) {
+            list = await this.model.find()
+                .sort({ createdAt: sort })
+            console.log('sort-list:', list)
+            return {
+                list,
+                count
+            }
+        }
+
+        if (page) {
+            list = await this.model.find()
+                .skip((page - 1) * 10)
+                .limit(limit)
+            return {
+                list,
+                count
+            }
+        }
+
+        return this.model.find()
   }
 
   @Post()

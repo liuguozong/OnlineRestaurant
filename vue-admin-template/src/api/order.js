@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 获取全部订单
-export function orderList(data) {
+export function orderList(query) {
   return request({
     url: '/orders',
     method: 'get',
-    data
+    params: query
   })
 }
 // 获取订单信息

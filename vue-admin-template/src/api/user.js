@@ -24,11 +24,11 @@ export function logout(token) {
   })
 }
 // 获取全部用户信息
-export function userList(data) {
+export function userList(query) {
   return request({
     url: '/users',
     method: 'get',
-    data
+    params: query
   })
 }
 // 获取用户信息

@@ -7,7 +7,6 @@
       <el-table-column prop="_id" label="id"></el-table-column>
       <el-table-column prop="name" label="菜名"></el-table-column>
       <el-table-column prop="genre" label="类别"></el-table-column>
-      <el-table-column prop="genre" label="数量"></el-table-column>
       <el-table-column prop="icon" label="图片">
         <template slot-scope="scope">
           <img :src="scope.row.icon" style="height:3em;" />
@@ -24,6 +23,7 @@
             placeholder="输入关键字搜索" 
             clearable
             @blur="searchMethod"
+            @clear="searchMethod"
           />
         </template>
         <template slot-scope="scope">
@@ -148,7 +148,6 @@ export default {
         count: 0,
         page: 1
       },
-      total: 0,
       search: '',
       dialogVisible: false, // 是否打开用户详情
       formLabelWidth: '120px',
@@ -300,7 +299,6 @@ export default {
     },
     // 获取所有用户加分页加查询
     fetchmenu(query) {
-      console.log(query)
       meunList(this.query).then((response) => {
         this.menus = response.list
         this.page.count = response.count

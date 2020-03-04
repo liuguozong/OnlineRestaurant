@@ -1,64 +1,84 @@
 <template>
-  <el-table
-    :data="
-      seats.filter((menus) => !search || seats.name.toLowerCase().includes(search.toLowerCase()))
-    "
-    style="width: 100%"
-  >
-    <el-table-column prop="_id" label="id"></el-table-column>
-    <el-table-column prop="name" label="座位名"></el-table-column>
-    <el-table-column prop="max" label="可容纳人数"></el-table-column>
-    <el-table-column prop="state" label="当前状态"></el-table-column>
-    <el-table-column align="right">
-      <template slot="header">
-        <el-button type="primary" @click="addmenu, (dialogVisible = true)">主要按钮</el-button>
-        <el-input v-model="search" size="mini" placeholder="输入关键字搜索" />
-      </template>
-      <template slot-scope="scope">
-        <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
-          Edit
-        </el-button>
+  <div>
+    <el-table
+      :data="seats"
+      style="width: 100%"
+    >
+      <el-table-column prop="_id" label="id"></el-table-column>
+      <el-table-column prop="name" label="座位名"></el-table-column>
+      <el-table-column prop="max" label="可容纳人数"></el-table-column>
+      <el-table-column prop="state" label="当前状态"></el-table-column>
+      <el-table-column align="right">
+        <template slot="header" slot-scope="scope">
+          <el-button type="primary" @click="addmenu, (dialogVisible = true)">主要按钮</el-button>
+          <el-input
+            v-model="query.key" 
+            icon="el-icon-search"
+            size="mini"
+            placeholder="输入关键字搜索" 
+            clearable
+            @blur="searchMethod"
+            @clear="searchMethod"
+          />
+        </template>
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
+            Edit
+          </el-button>
 
-        <el-dialog
-          title="提示"
-          :visible.sync="dialogVisible"
-          width="30%"
-          :before-close="handleClose"
-        >
-          <el-form :model="seatsdata">
-            <el-tabs type="card" name="1">
-              <el-tab-pane label="座位信息">
-                <el-form-item label="座位名">
-                  <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>
-                </el-form-item>
-                <el-form-item label="可容纳人数">
-                  <el-input v-model="seatsdata.max" placeholder="可容纳人数"></el-input>
-                </el-form-item>
-                <el-form-item label="当前状态">
-                  <el-select v-model="seatsdata.state" placeholder="请选择状态">
-                    <el-option label="空闲" value="空闲"></el-option>
-                    <el-option label="预定" value="预定"></el-option>
-                    <el-option label="用餐中" value="用餐中"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-tab-pane>
-              <el-tab-pane label="订单详情">订单详情</el-tab-pane>
-            </el-tabs>
-            {{ seatsdata }}
+          <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose"
+          >
+            <el-form :model="seatsdata">
+              <el-tabs type="card" name="1">
+                <el-tab-pane label="座位信息">
+                  <el-form-item label="座位名">
+                    <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>
+                  </el-form-item>
+                  <el-form-item label="可容纳人数">
+                    <el-input v-model="seatsdata.max" placeholder="可容纳人数"></el-input>
+                  </el-form-item>
+                  <el-form-item label="当前状态">
+                    <el-select v-model="seatsdata.state" placeholder="请选择状态">
+                      <el-option label="空闲" value="空闲"></el-option>
+                      <el-option label="预定" value="预定"></el-option>
+                      <el-option label="用餐中" value="用餐中"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-tab-pane>
+                <el-tab-pane label="订单详情">订单详情</el-tab-pane>
+              </el-tabs>
+              {{ seatsdata }}
         
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="handleClose">取 消</el-button>
-            <el-button type="primary" @click="handleClose">确 定</el-button>
-          </span>
-        </el-dialog>
-
-        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-          Delete
-        </el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="handleClose">取 消</el-button>
+              <el-button type="primary" @click="handleClose">确 定</el-button>
+            </span>
+          </el-dialog>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
+            Delete
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-footer>
+      <el-row type="flex" justify="center">
+        <el-col :span="6">
+          <el-pagination
+            style="margin-bottom:15px"
+            align="center"
+            layout="prev, pager, next"
+            :total="page.count"
+            @current-change="changePage"
+          />
+        </el-col>
+      </el-row>
+    </el-footer>
+  </div>
 </template>
 
 <script>
@@ -75,6 +95,17 @@ export default {
         state: '',
         coaches: ''
       },
+      query: {
+        key: '',
+        limit: 10,
+        page: 1,
+        sort: ''
+      },
+      page: {
+        limit: 10,
+        count: 0,
+        page: 1
+      },
       search: '',
       dialogVisible: false,
       formLabelWidth: '120px'
@@ -85,9 +116,27 @@ export default {
   },
   methods: {
     async seat() {
-      seatList().then((data) => {
-        this.seats = data.flat()
+      seatList(this.query).then((response) => {
+        this.seats = response.list
+        this.page.count = response.count
       })
+    },
+    // 分页
+    changePage(val) {
+      this.query.page = val
+      console.log('当前页：', val, 'query数据：', this.query)
+      this.seat(this.query)
+    },
+    // 搜索
+    async searchMethod() {
+      const query = Object.assign({}, this.query)
+      const res = await seatList(query)
+      if (res) {
+        this.seats = res.list
+        this.page.count = res.count
+      } else {
+        this.$message.info('请检查输入内容')
+      }
     },
     // 编辑按钮
     async handleEdit(index, row, data) {

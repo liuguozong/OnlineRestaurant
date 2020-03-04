@@ -76,8 +76,6 @@ export class MenusController {
         }
 
         return this.model.find()
-            .select('-password')
-            .populate('activitys')
   }
   @Post()
   @ApiOperation({ summary: '创建菜品' })
