@@ -21,7 +21,7 @@
       <el-table-column prop="price" label="应付金额"></el-table-column>
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="dialogVisible = true">主要按钮</el-button>
+          <el-button type="primary" @click="aaaa">主要按钮</el-button>
           <el-input
             v-model="query.key" 
             icon="el-icon-search"
@@ -41,44 +41,43 @@
             :visible.sync="dialogVisible"
             width="30%"
             :before-close="handleClose"
+            center
           >
             {{ ordersdata.seats }}
-            <el-form v-model="o">
-              <el-form-item label="用户">
-                <el-input v-model="o" :disabled="true"></el-input>
-              </el-form-item>
-              <el-form-item label="座位">
-                <el-select v-model="ordersdata.seats" multiple>
-                  <el-option
-                    v-for="item of seats"
-                    :key="item._id"
-                    :label="item.name"
-                    :value="item._id"
-                  ></el-option>
-                </el-select>
-              </el-form-item>
-              <el-collapse>
-                <el-collapse-item title="菜单详情">
-                  {{ ordersdata.menus }}
-                  <el-form-item label="菜单">
-                    <el-select
-                      v-model="newly"
-                      filterable
-                      multiple
-                      collapse-tags
-                      clearable
-                      placeholder="请选择添加菜品"
-                      @visible-change="input($event)"
-                    >
-                      <el-option
-                        v-for="item of add"
-                        :key="item._id"
-                        :label="item.name"
-                        :value="item._id"
-                      ></el-option>
-                    </el-select>
-                  </el-form-item>
-                  {{ detailed }}
+            <template>
+              <el-tabs v-model="activeName">
+                <el-tab-pane label="基本信息" name="first">
+                  <el-form v-model="o">
+                    <el-form-item label="用户" :label-width="formLabelWidth">
+                      <el-input 
+                        v-model="o" 
+                        :disabled="true"
+                        style="width:100px"
+                      ></el-input>
+                    </el-form-item>
+                  </el-form>
+                </el-tab-pane>
+                <el-tab-pane label="菜单信息" name="second">
+                  <el-form>
+                    <el-form-item label="添加菜品">
+                      <el-select
+                        v-model="newly"
+                        filterable
+                        multiple
+                        collapse-tags
+                        clearable
+                        placeholder="请选择添加菜品"
+                        @visible-change="input($event)"
+                      >
+                        <el-option
+                          v-for="item of add"
+                          :key="item._id"
+                          :label="item.name"
+                          :value="item._id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-form>
                   <template>
                     <el-table
                       :data="detailed"
@@ -109,9 +108,53 @@
                       </el-table-column>
                     </el-table>
                   </template>
-                </el-collapse-item>
-              </el-collapse>
-            </el-form>
+                </el-tab-pane>
+                <el-tab-pane label="座位信息" name="third">
+                  <el-input
+                    v-model="seatedName"
+
+                    :disabled="true"
+                  >
+                  </el-input>
+                  <!-- 可供选择的表 -->
+                  <el-table
+                    :data="seat"
+                    style="width: 100%"
+                  >
+                    <el-table-column
+                      prop="name"
+                      label="座位名"
+                      width="180"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                      prop="max"
+                      label="可容纳人数"
+                      width="180"
+                    >
+                    </el-table-column>
+                    <el-table-column label="操作">
+                      <template slot-scope="scope">
+                        <el-button
+                          size="mini"
+                          type="warning"
+                          @click="exchange(scope.$index, scope.row)"
+                        >交换</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-tab-pane>
+                <el-tab-pane label="评论信息" name="fourth">
+                  <el-rate
+                    v-model="taste"
+                    :icon-classes="iconClasses"
+                    void-icon-class="icon-rate-face-off"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                  >
+                  </el-rate>
+                </el-tab-pane>
+              </el-tabs>
+            </template>
             <span slot="footer" class="dialog-footer">
               <el-button @click="handleClose">取 消</el-button>
               <el-button type="primary" @click="handleClose">确 定</el-button>
@@ -141,9 +184,8 @@
 </template>
 <script>
 import { orderList, orderdata, orderedit, orderremove, detailedadd, detaileddit } from '@/api/order'
-import { userList } from '@/api/user'
 import { meunList } from '@/api/menu'
-import { seatList } from '@/api/seat'
+import { seatList, seatedit } from '@/api/seat'
 import request from '@/utils/request'
 export default {
   data() {
@@ -154,7 +196,11 @@ export default {
       users: [],
       menu: [],
       menus: [],
+      seat: [],
       seats: [],
+      seated: [],
+      state: [],
+      seatedName: '', 
       detailed: [],
       detaileds: [],
       add: [],
@@ -172,15 +218,16 @@ export default {
         page: 1
       },
       o: '',
+      taste:1,
       ordersdata: {
         user: '',
         menus: '',
         seat: '',
         evaluate: '',
         icon: '',
-        taste: '',
-        service: '',
-        surroundings: '',
+        taste: 5,
+        service: 5,
+        surroundings: 5,
         state: '',
         price: '',
         Mode: '',
@@ -188,7 +235,9 @@ export default {
       },
       search: '',
       dialogVisible: false, // 是否打开用户详情
-      formLabelWidth: '120px'
+      activeName: 'first', // 控制Tabs 标签页
+      iconClasses: ['icon-rate-face-1', 'icon-rate-face-2', 'icon-rate-face-3'], 
+      formLabelWidth: '70px'
     }
   },
   created() {
@@ -196,7 +245,7 @@ export default {
   },
   methods: {
     async oreder() {
-      orderList(this.query).then((response) => {
+      await orderList(this.query).then((response) => {
         this.orders = response.list
         this.page.count = response.count
       })
@@ -222,18 +271,22 @@ export default {
     async handleEdit(index, row, data) {
       const res = await orderdata(`${row._id}`, data)
       this.ordersdata = Object.assign({}, this.ordersdata, res.data)
+      // 得到座位详细信息 然后将座位名赋值
+      this.seated = Object.assign({}, this.seat, res.detailed.seats)
+      this.seatedName = this.seated[0]['name']
       this.menu = res.detailed['detailed'][0]
       this.detailed = res.detailed.detailed[0]['menu']
-      meunList().then((data) => {
+      // 得到所有的菜单和座位
+      await meunList().then((data) => {
         this.menus = data.flat(Infinity)
       })
-      userList().then((data) => {
-        this.users = data.flat(Infinity)
-      })
-      seatList().then((data) => {
-        this.seats = data
+      this.query.key = '空闲'
+      await seatList(this.query).then((data) => {
+        this.seats = data.list
+        console.log('1', this.seats)
       })
       this.o = this.ordersdata.user[0]['name']
+      this.Seat()
     },
     // 删除按钮
     handleDelete(index, row) {
@@ -270,10 +323,17 @@ export default {
             })
             this.menu['menu'] = this.detailed
             detaileddit(this.ordersdata.detailed[0], this.menu)
-            console.log(`保存的订单数据`, this.ordersdata)
+            if (!(this.state)) {
+              // 修改旧替换座位信息
+              seatedit(this.state._id, this.state)
+              // 修改新替换座位信息
+              seatedit(this.ordersdata.seats, this.seated)
+            }   
             this.ordersdata = {}
-            this.oreder()
+            this.activeName = ''
           })
+          this.query.key = ''
+          this.oreder()
           this.dialogVisible = false
         })
         .catch((_) => {
@@ -282,6 +342,7 @@ export default {
           this.$message({
             message: '放弃保存并离开页面'
           })
+          this.activeName = ''
         })
     },
     //  创建订单详细  订单表和详情表相关联
@@ -313,8 +374,8 @@ export default {
       const s = sum.reduce((acc, cur) => acc + cur, 0)
       sums[0] = '总价'
       sums[2] = s
-      this.ordersdata.total = sums[1]
-      this.menu.total = sums[1]
+      this.ordersdata.total = s
+      this.menu.total = s
       return sums
     },
     // 加菜下拉触发事件
@@ -362,6 +423,36 @@ export default {
         }
         console.log(item)
       })
+    },
+    async aaaa() {
+      this.query.key = '肉类'
+      console.log(this.query)
+      meunList(this.query).then((response) => {
+        const res = response
+        console.log('144', res)
+      })
+    },
+    async Seat() {
+      let a = []
+      a = await this.seats.filter((item) => {
+        if (this.ordersdata.seats.indexOf(item._id) === -1) {
+          return item
+        }
+      })
+      this.seat = a
+    },
+    // 替换座位 修改座位状态
+    async exchange(index, row) {
+      this.ordersdata.seats = row._id
+      this.seatedName = row.name
+      this.seated = row
+      this.seated.state = '用餐中'
+      this.seated.coaches = this.ordersdata.detailed
+      console.log(`1123`, this.ordersdata.detailed)
+      this.Seat()
+      this.state = row
+      this.state.state = '空闲'
+      this.state.coaches = []
     }
   }
 }

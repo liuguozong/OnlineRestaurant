@@ -1,7 +1,7 @@
 import { prop, modelOptions, arrayProp, Ref } from '@typegoose/typegoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, ArrayUnique } from 'class-validator/decorator/decorators'
-import{Order} from '../order/order.model' 
+import { Detailed } from '../detailed/detailed.model'
 
 
 @modelOptions({
@@ -23,6 +23,6 @@ export class Seat {
     state: string
     @ApiProperty({ description: '订单' })
     // 座位只允许有一个订单
-    @arrayProp({ itemsRef: 'Order'})
-    coaches: Ref<Order>[]
+    @arrayProp({ itemsRef: 'Detailed'})
+    coaches: Ref<Detailed>[]
 }

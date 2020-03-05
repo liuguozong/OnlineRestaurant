@@ -43,6 +43,7 @@ export class SeatsController {
                 .skip((page - 1) * 10)
                 .limit(limit)
                 .sort({ createdAt: sort })
+                .populate('coaches')
             count = list.length
             return {
                 list,
@@ -86,7 +87,7 @@ export class SeatsController {
   @Get(':id')
   @ApiOperation({ summary: '座位详情' })
   async detail(@Param('id') id: string) {
-    return await this.model.findById(id).select('+password')
+    return await this.model.findById(id).populate('coaches')
   }
   @Post()
   @ApiOperation({ summary: '创建座位' })

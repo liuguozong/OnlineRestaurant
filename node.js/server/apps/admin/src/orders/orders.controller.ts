@@ -36,8 +36,7 @@ export class OrdersController {
         { name: { $regex: reg } },
         { state: { $regex: reg } },
         { mode: { $regex: reg } }
-      ],
-      $all:["reg"]
+      ]
     }
 
     if (sort && limit && key) {
@@ -78,7 +77,6 @@ export class OrdersController {
         .populate('user')
         .populate('menus')
         .populate('seats')
-      console.log('sort-list:', list)
       return {
         list,
         count
