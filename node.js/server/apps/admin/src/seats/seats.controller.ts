@@ -87,7 +87,8 @@ export class SeatsController {
   @Get(':id')
   @ApiOperation({ summary: '座位详情' })
   async detail(@Param('id') id: string) {
-    return await this.model.findById(id).populate('coaches')
+    const res = await this.model.findById(id).populate('coaches')
+    return res
   }
   @Post()
   @ApiOperation({ summary: '创建座位' })

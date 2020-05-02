@@ -1,17 +1,14 @@
 <template>
   <div>
-    {{ users }}
-    <el-table
-      :data="users"
-      style="width: 100%"
-    >
+    <el-table :data="users" style="width: 100%">
+      <el-table-column type="index"></el-table-column>
       <el-table-column prop="_id" label="id"></el-table-column>
       <el-table-column prop="username" label="用户名"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
       <el-table-column prop="gender" label="性别"></el-table-column>
       <el-table-column prop="avatar" label="头像">
         <template slot-scope="scope">
-          <img :src="scope.row.avatar" style="height:3em;">
+          <img :src="scope.row.avatar" style="height:3em;" />
         </template>
       </el-table-column>
       <el-table-column prop="gradae" label="等级"></el-table-column>
@@ -20,14 +17,15 @@
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
           <el-input
-            v-model="query.key" 
+            v-model="query.key"
             icon="el-icon-search"
             size="mini"
-            placeholder="输入关键字搜索" 
+            placeholder="输入关键字搜索"
             clearable
             @blur="searchMethod"
             @clear="searchMethod"
-          />>
+          />
+          >
         </template>
         <template slot-scope="scope">
           <el-button
@@ -43,7 +41,6 @@
             :before-close="handleClose"
             center
           >
-            {{ usersdata }}
             <el-form :v-model="usersdata">
               <el-form-item label="用户名" :label-width="formLabelWidth">
                 <el-input
@@ -53,10 +50,7 @@
                 ></el-input>
               </el-form-item>
               <el-form-item label="名称" :label-width="formLabelWidth">
-                <el-input
-                  v-model="usersdata.name"
-                  autocomplete="off"
-                ></el-input>
+                <el-input v-model="usersdata.name" autocomplete="off"></el-input>
               </el-form-item>
               <el-form-item label="等级" :label-width="formLabelWidth">
                 <el-select v-model="usersdata.gradae" placeholder="请选择等级">
@@ -76,19 +70,12 @@
                   <i v-else class="el-icon-plus avatar-uploader-icon" />
                 </el-upload>
               </el-form-item>
-              <el-form-item
-                label="性别"
-                :label-width="formLabelWidth"
-              >
+              <el-form-item label="性别" :label-width="formLabelWidth">
                 <el-radio v-model="usersdata.gender" label="男">男</el-radio>
                 <el-radio v-model="usersdata.gender" label="女">女</el-radio>
-              </el-form-item>  
+              </el-form-item>
               <el-form :v-model="usersdata" label-width="100px">
-                <el-form-item
-                  prop="password"
-                  label="密码"
-                  :rules="rules2.password"
-                >
+                <el-form-item prop="password" label="密码" :rules="rules2.password">
                   <el-input v-model="usersdata.password" show-password></el-input>
                 </el-form-item>
                 <el-form-item
@@ -105,11 +92,7 @@
                 >
                   <el-input v-model="usersdata.email"></el-input>
                 </el-form-item>
-                <el-form-item
-                  prop="phone"
-                  label="手机号"
-                  :rules="rules2.phone"
-                >
+                <el-form-item prop="phone" label="手机号" :rules="rules2.phone">
                   <el-input v-model="usersdata.phone"></el-input>
                 </el-form-item>
               </el-form>
@@ -150,25 +133,25 @@ export default {
     var phone = (rule, value, callback) => {
       const reg = /^1[34578]\d{9}$/
       if (value === '') {
-        callback(new Error('请输手机号'));
+        callback(new Error('请输手机号'))
       } else {
         if (!reg.test(value)) {
           return callback(new Error('手机号不正确'))
         }
-        callback();
+        callback()
       }
-    };
+    }
     var password = (rule, value, callback) => {
-      const reg = /^(?![A-Z]+$)(?![a-z]+$)(?!\d+$)\S{8,}$/;
+      const reg = /^(?![A-Z]+$)(?![a-z]+$)(?!\d+$)\S{8,}$/
       if (value === '') {
-        callback(new Error('请输密码'));
+        callback(new Error('请输密码'))
       } else {
         if (!reg.test(value)) {
           return callback(new Error('请输入8为切字母开头的密码'))
         }
-        callback();
+        callback()
       }
-    };
+    }
     return {
       BASEURL: request.defaults.baseURL, // 文件上传URL
       rules2: {
@@ -202,8 +185,7 @@ export default {
       }
     }
   },
-  computed: {
-  },
+  computed: {},
   created() {
     this.user()
   },
@@ -244,20 +226,22 @@ export default {
         cancelButtonText: '取消',
         type: 'warning',
         center: true
-      }).then(() => {   
-        upremove(`${row._id}`).then((result) => {
-          this.user()
-          this.$message({
-            type: 'success',
-            message: result.message
+      })
+        .then(() => {
+          upremove(`${row._id}`).then((result) => {
+            this.user()
+            this.$message({
+              type: 'success',
+              message: result.message
+            })
           })
-        });
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
-      });
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     // 保存
     async handleClose() {
@@ -268,7 +252,7 @@ export default {
             this.$message({
               type: 'success',
               message: result.message
-            });
+            })
           })
           this.dialogVisible = false
         })
@@ -277,7 +261,7 @@ export default {
           this.$message({
             message: '放弃保存并离开页面'
           })
-        });
+        })
     },
     // 头像上传控件
     handleAvatarSuccess(res, file) {

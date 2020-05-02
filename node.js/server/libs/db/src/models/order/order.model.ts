@@ -29,16 +29,16 @@ export class Order {
     evaluate: string
     @ApiProperty({description:'图片'})
     @prop()
-    icon: string
+    icon:  Array<string>
     @ApiProperty({description:'味道评分'})
     @prop()
-    taste: string
+    taste: number
     @ApiProperty({description:'服务评分'})
     @prop()
-    service: string
+    service: number
     @ApiProperty({description:'环境评分'})
     @prop()
-    surroundings: string
+    surroundings: number
     @ApiProperty({description:'当前状态'})
     @prop()
     state: string

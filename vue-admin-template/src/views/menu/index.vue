@@ -1,9 +1,7 @@
 <template>
   <div>
-    <el-table
-      :data="menus"
-      style="width: 100%"
-    >
+    <el-table :data="menus" style="width: 100%">
+      <el-table-column type="index"></el-table-column>
       <el-table-column prop="_id" label="id"></el-table-column>
       <el-table-column prop="name" label="菜名"></el-table-column>
       <el-table-column prop="genre" label="类别"></el-table-column>
@@ -15,19 +13,22 @@
       <el-table-column prop="price" label="价钱"></el-table-column>
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="(addmenu,(dialogVisible = true))">主要按钮</el-button>
+          <el-button type="primary" @click="addmenu, (dialogVisible = true)">主要按钮</el-button>
           <el-input
-            v-model="query.key" 
+            v-model="query.key"
             icon="el-icon-search"
             size="mini"
-            placeholder="输入关键字搜索" 
+            placeholder="输入关键字搜索"
             clearable
             @blur="searchMethod"
             @clear="searchMethod"
           />
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)"
+          >
             Edit
           </el-button>
           <el-dialog
@@ -37,15 +38,11 @@
             :before-close="handleClose"
             center
           >
-            {{ menusdata }}
             <el-form :v-model="menusdata">
               <el-form-item label="名称">
-                <el-input
-                  v-model="menusdata.name"
-                  autocomplete="off"
-                  clearable
-                  style="width:200px"
-                ><svg-icon slot="prefix" icon-class="huoguo" /></el-input>
+                <el-input v-model="menusdata.name" autocomplete="off" clearable style="width:200px">
+                  <svg-icon slot="prefix" icon-class="huoguo" />
+                </el-input>
               </el-form-item>
               <el-form-item label="类型">
                 <el-cascader
@@ -54,7 +51,7 @@
                   placeholder="类型"
                 ></el-cascader>
               </el-form-item>
-              <el-form-item label="图片" :label-width="formLabelWidth">
+              <el-form-item label="图片">
                 <el-upload
                   class="avatar-uploader"
                   :action="BASEURL + 'upload'"
@@ -72,7 +69,9 @@
                   clearable
                   placeholder="请输入菜品价格"
                   style="width:150px"
-                ><svg-icon slot="prefix" icon-class="qianmoney" /></el-input>
+                >
+                  <svg-icon slot="prefix" icon-class="qianmoney" />
+                </el-input>
               </el-form-item>
               <el-form-item label="标签">
                 <el-input
@@ -239,7 +238,7 @@ export default {
     // 保存
     async handleClose() {
       this.$confirm('是否保存？')
-        .then((_) => {   
+        .then((_) => {
           if (this.menusdata._id) {
             menuedit(this.menusdata._id, this.menusdata).then((result) => {
               this.$message({
@@ -276,7 +275,7 @@ export default {
       this.$message.success('上传成功!')
     },
     beforeAvatarUpload(file) {
-      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png')
+      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
       const isLt2M = file.size / 1024 / 1024 < 2
 
       if (!isJPG) {

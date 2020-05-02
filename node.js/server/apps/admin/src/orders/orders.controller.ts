@@ -63,7 +63,6 @@ export class OrdersController {
         .populate('seats')
         .exec()
       count = list.length
-      console.log(key, reg, list.length)
       return {
         list,
         count

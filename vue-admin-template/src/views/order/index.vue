@@ -4,6 +4,7 @@
       :data="orders"
       style="width: 100%"
     >
+      <el-table-column type="index"></el-table-column>
       <el-table-column prop="_id" label="id"></el-table-column>
       <el-table-column label="用户名">
         <template slot-scope="scope">
@@ -17,11 +18,11 @@
           </span>
         </template>
       </el-table-column>
+      <el-table-column prop="state" label="当前状态"></el-table-column>
       <el-table-column prop="mode" label="支付方式"></el-table-column>
-      <el-table-column prop="price" label="应付金额"></el-table-column>
+      <el-table-column prop="total" label="应付金额"></el-table-column>
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="aaaa">主要按钮</el-button>
           <el-input
             v-model="query.key" 
             icon="el-icon-search"
@@ -37,13 +38,12 @@
             Edit
           </el-button>
           <el-dialog
-            title="提示"
+            title="订单详情"
             :visible.sync="dialogVisible"
             width="30%"
             :before-close="handleClose"
             center
           >
-            {{ ordersdata.seats }}
             <template>
               <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="first">
@@ -54,6 +54,44 @@
                         :disabled="true"
                         style="width:100px"
                       ></el-input>
+                    </el-form-item>
+                    <el-form-item label="座位" :label-width="formLabelWidth">
+                      <el-input 
+                        v-model="seatedName" 
+                        :disabled="true"
+                        style="width:100px"
+                      ></el-input>
+                    </el-form-item>
+                    <el-form-item label="应付金额" :label-width="formLabelWidth">
+                      <el-input 
+                        v-model="ordersdata.total" 
+                        :disabled="true"
+                        style="width:100px"
+                      ></el-input>
+                    </el-form-item>
+                    <el-form-item label="当前状态" :label-width="formLabelWidth">
+                      <el-select v-model="ordersdata.state" placeholder="请选择当前方式">
+                        <el-option label="预定" value="预定"></el-option>
+                        <el-option label="正在用餐" value="正在用餐"></el-option>
+                        <el-option label="退款" value="退款"></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="支付方式" :label-width="formLabelWidth">
+                      <el-select v-model="ordersdata.mode" placeholder="请选择支付方式">
+                        <el-option label="现金支付" value="现金支付"></el-option>
+                        <el-option label="二维码支付" value="二维码支付"></el-option>
+                        <el-option label="在线支付" value="在线支付"></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="备注" :label-width="formLabelWidth">
+                      <el-input
+                        v-model="ordersdata.remarks"
+                        type="textarea"
+                        placeholder="请输入内容"
+                        maxlength="30"
+                        show-word-limit
+                      >
+                      </el-input>
                     </el-form-item>
                   </el-form>
                 </el-tab-pane>
@@ -145,13 +183,73 @@
                   </el-table>
                 </el-tab-pane>
                 <el-tab-pane label="评论信息" name="fourth">
-                  <el-rate
-                    v-model="taste"
-                    :icon-classes="iconClasses"
-                    void-icon-class="icon-rate-face-off"
-                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                  >
-                  </el-rate>
+                  <el-form>
+                    <el-form-item label="味道评分">
+                      <el-rate
+                        v-model="ordersdata.taste"
+                        :max="5"
+                        void-icon-class="el-icon-cherry"
+                        :colors="colors"
+                        show-text
+                        style="margin-top:0.6rem"
+                      >
+                      </el-rate>
+                    </el-form-item>
+                    <el-form-item label="服务评分">
+                      <el-rate
+                        v-model="ordersdata.service"
+                        :max="5"
+                        void-icon-class="el-icon-cherry"
+                        :colors="colors"
+                        show-text
+                        style="margin-top:0.6rem"
+                      >
+                      </el-rate>
+                    </el-form-item>
+                    <el-form-item label="环境评分">
+                      <el-rate
+                        v-model="ordersdata.surroundings"
+                        :max="5"
+                        void-icon-class="el-icon-cherry"
+                        :colors="colors"
+                        show-text
+                        style="margin-top:0.6rem"
+                      >
+                      </el-rate>
+                    </el-form-item>
+                    <el-form-item label="评论">
+                      <el-card :body-style="{ padding: '0px' }">
+                        <el-upload
+                          :file-list="fileList"
+                          :action="BASEURL+'upload'"
+                          list-type="picture-card"
+                          :on-preview="handlePictureCardPreview"
+                          :on-remove="handleRemove"
+                          :on-success="handleSuccess"            
+                          :on-exceed="exceed"
+                          :limit="imgNumber"
+                          :before-upload="beforeAvatarUpload"
+                        >
+                          <i class="el-icon-plus" />
+                        </el-upload>
+                        <el-dialog :visible.sync="zp" :modal-append-to-body="false">
+                          <img width="100%" :src="dialogImageUrl" alt>
+                        </el-dialog>
+                        <div style="padding: 14px;">
+                          <span>
+                            <el-input
+                              v-model="ordersdata.evaluate"
+                              type="textarea"
+                              placeholder="请输入内容"
+                              maxlength="30"
+                              show-word-limit
+                            >
+                            </el-input>
+                          </span>
+                        </div>
+                      </el-card>
+                    </el-form-item>
+                  </el-form>
                 </el-tab-pane>
               </el-tabs>
             </template>
@@ -218,7 +316,7 @@ export default {
         page: 1
       },
       o: '',
-      taste:1,
+      taste: null,
       ordersdata: {
         user: '',
         menus: '',
@@ -236,7 +334,12 @@ export default {
       search: '',
       dialogVisible: false, // 是否打开用户详情
       activeName: 'first', // 控制Tabs 标签页
-      iconClasses: ['icon-rate-face-1', 'icon-rate-face-2', 'icon-rate-face-3'], 
+      colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
+      dialogImageUrl: '',
+      zp: false, 
+      alter: false, //  是否修改了座位
+      imgNumber: 9,
+      fileList: [],
       formLabelWidth: '70px'
     }
   },
@@ -268,9 +371,11 @@ export default {
       }
     },
     // 编辑按钮
-    async handleEdit(index, row, data) {
+    async handleEdit(index, row, data,) {
       const res = await orderdata(`${row._id}`, data)
       this.ordersdata = Object.assign({}, this.ordersdata, res.data)
+      this.fileList = this.ordersdata.icon 
+      console.log(`1123`, this.fileList)
       // 得到座位详细信息 然后将座位名赋值
       this.seated = Object.assign({}, this.seat, res.detailed.seats)
       this.seatedName = this.seated[0]['name']
@@ -283,10 +388,12 @@ export default {
       this.query.key = '空闲'
       await seatList(this.query).then((data) => {
         this.seats = data.list
-        console.log('1', this.seats)
+        this.query.key = ''
       })
       this.o = this.ordersdata.user[0]['name']
       this.Seat()
+      this.alter = false
+      this.replace()
     },
     // 删除按钮
     handleDelete(index, row) {
@@ -315,7 +422,7 @@ export default {
     // 保存
     async handleClose() {
       this.$confirm('是否保存？')
-        .then((_) => {
+        .then((_) => {               
           orderedit(this.ordersdata._id, this.ordersdata).then((result) => {
             this.$message({
               type: 'success',
@@ -323,14 +430,17 @@ export default {
             })
             this.menu['menu'] = this.detailed
             detaileddit(this.ordersdata.detailed[0], this.menu)
-            if (!(this.state)) {
+            if (this.alter) {
               // 修改旧替换座位信息
-              seatedit(this.state._id, this.state)
+              seatedit(this.state[0]['_id'], this.state[0])
+              console.log(`j`, this.state[0])
+              console.log(`x`, this.seated)
               // 修改新替换座位信息
               seatedit(this.ordersdata.seats, this.seated)
             }   
+           
             this.ordersdata = {}
-            this.activeName = ''
+            this.activeName = 'first'
           })
           this.query.key = ''
           this.oreder()
@@ -342,7 +452,7 @@ export default {
           this.$message({
             message: '放弃保存并离开页面'
           })
-          this.activeName = ''
+          this.activeName = 'first'
         })
     },
     //  创建订单详细  订单表和详情表相关联
@@ -445,14 +555,49 @@ export default {
     async exchange(index, row) {
       this.ordersdata.seats = row._id
       this.seatedName = row.name
-      this.seated = row
+      const { ...seated } = row
+      this.seated = seated 
       this.seated.state = '用餐中'
       this.seated.coaches = this.ordersdata.detailed
-      console.log(`1123`, this.ordersdata.detailed)
+      this.alter = true
       this.Seat()
-      this.state = row
-      this.state.state = '空闲'
-      this.state.coaches = []
+      console.log('x', this.seated._id)
+      console.log('x', this.seated)
+    },
+    async replace() {
+      const { ...state } = this.seated
+      this.state = state
+      this.state[0]['state'] = '空闲'
+      this.state[0]['coaches'] = []
+      console.log('j', this.state)
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png')
+      const isLt2M = file.size / 1024 / 1024 < 2
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!')
+      }
+      return isJPG && isLt2M
+    },
+    async exceed() {
+      this.$message.error('最多只能上传9张图片')
+    },
+    handleSuccess(jsonData) { // 上传图片成功传给后台的数据
+      this.ordersdata.icon.push({
+        name: jsonData,
+        url: jsonData
+      });
+    },
+    handleRemove(file, fileList) { // 移除图片传给后台的数据
+      this.ordersdata.icon = fileList
+    },
+    handlePictureCardPreview(file) { // 点击放大图片
+      this.dialogImageUrl = file.url;
+      this.zp = true;
     }
   }
 }
@@ -460,29 +605,26 @@ export default {
 
 <style lang="scss">
 .avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #409eff;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
-}
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-}
-.add {
-  left: 300px;
-}
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>

@@ -5,7 +5,8 @@ import {
   HttpException,
   Param,
   Put,
-  Delete
+  Delete,
+  Get
 } from '@nestjs/common'
 import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { InjectModel } from 'nestjs-typegoose'
@@ -19,6 +20,11 @@ export class DetailedsController {
     @InjectModel(Detailed)
     private readonly model: ReturnModelType<typeof Detailed>
   ) {}
+  @Get()
+  @ApiOperation({ summary: '所有订单' })
+  async index(){
+    return this.model.find()
+  }
   @Post()
   @ApiOperation({ summary: '创建详细订单' })
   async create(@Body() createPostDto) {

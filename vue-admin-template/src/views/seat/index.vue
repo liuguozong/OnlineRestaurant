@@ -1,9 +1,7 @@
 <template>
   <div>
-    <el-table
-      :data="seats"
-      style="width: 100%"
-    >
+    <el-table :data="seats" style="width: 100%">
+      <el-table-column type="index"></el-table-column>
       <el-table-column prop="_id" label="id"></el-table-column>
       <el-table-column prop="name" label="座位名"></el-table-column>
       <el-table-column prop="max" label="可容纳人数"></el-table-column>
@@ -12,17 +10,20 @@
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addmenu, (dialogVisible = true)">主要按钮</el-button>
           <el-input
-            v-model="query.key" 
+            v-model="query.key"
             icon="el-icon-search"
             size="mini"
-            placeholder="输入关键字搜索" 
+            placeholder="输入关键字搜索"
             clearable
             @blur="searchMethod"
             @clear="searchMethod"
           />
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)">
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row), (dialogVisible = true)"
+          >
             Edit
           </el-button>
 
@@ -31,17 +32,23 @@
             :visible.sync="dialogVisible"
             width="30%"
             :before-close="handleClose"
+            center
           >
-            <el-form :model="seatsdata">
-              <el-tabs type="card" name="1">
-                <el-tab-pane label="座位信息">
-                  <el-form-item label="座位名">
+            <el-form>
+              <el-tabs v-model="activeName">
+                <el-tab-pane label="座位信息" name="first">
+                  <el-form-item label="座位名" :label-width="formLabelWidth">
                     <el-input v-model="seatsdata.name" placeholder="请输入座位名"></el-input>
                   </el-form-item>
-                  <el-form-item label="可容纳人数">
-                    <el-input v-model="seatsdata.max" placeholder="可容纳人数"></el-input>
+                  <el-form-item label="可容纳人数" :label-width="formLabelWidth">
+                    <el-select v-model="seatsdata.max" placeholder="请选择人数">
+                      <el-option label="二人桌" value="二人桌"></el-option>
+                      <el-option label="四人桌" value="四人桌"></el-option>
+                      <el-option label="八人桌" value="八人桌"></el-option>
+                      <el-option label="十二人桌" value="十二"></el-option>
+                    </el-select>
                   </el-form-item>
-                  <el-form-item label="当前状态">
+                  <el-form-item label="当前状态" :label-width="formLabelWidth">
                     <el-select v-model="seatsdata.state" placeholder="请选择状态">
                       <el-option label="空闲" value="空闲"></el-option>
                       <el-option label="预定" value="预定"></el-option>
@@ -49,10 +56,21 @@
                     </el-select>
                   </el-form-item>
                 </el-tab-pane>
-                <el-tab-pane label="订单详情">订单详情</el-tab-pane>
+                <el-tab-pane label="订单详情" name="second">
+                  <template>
+                    <el-table
+                      :data="menu"
+                      style="width: 100%"
+                      :summary-method="getSummaries"
+                      show-summary
+                    >
+                      <el-table-column prop="name" label="名字" width="100"></el-table-column>
+                      <el-table-column prop="number" label="数量" width="180"></el-table-column>
+                      <el-table-column prop="price" label="单价" width="100"></el-table-column>
+                    </el-table>
+                  </template>
+                </el-tab-pane>
               </el-tabs>
-              {{ seatsdata }}
-        
             </el-form>
             <span slot="footer" class="dialog-footer">
               <el-button @click="handleClose">取 消</el-button>
@@ -95,6 +113,7 @@ export default {
         state: '',
         coaches: ''
       },
+      menu: [],
       query: {
         key: '',
         limit: 10,
@@ -108,7 +127,8 @@ export default {
       },
       search: '',
       dialogVisible: false,
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      activeName: 'first'
     }
   },
   created() {
@@ -139,10 +159,10 @@ export default {
       }
     },
     // 编辑按钮
-    async handleEdit(index, row, data) {
-      seatdata(`${row._id}`, data).then((data) => {
+    async handleEdit(index, row) {
+      seatdata(`${row._id}`).then((data) => {
         this.seatsdata = data
-        console.log(this.seatsdata)
+        this.menu = data.coaches[0][`menu`]
       })
     },
     // 删除按钮
@@ -175,17 +195,16 @@ export default {
       this.$confirm('是否保存？')
         .then((_) => {
           if (this.seatsdata._id) {
-            console.log(this.seatsdata)
             seatedit(this.seatsdata._id, this.seatsdata).then((result) => {
-              console.log(this.seatsdata)
               this.$message({
                 type: 'success',
                 message: result.message
               })
               this.seatsdata = {}
               this.seat()
+              this.activeName = 'first'
             })
-          } else { 
+          } else {
             seateadd(this.seatsdata).then((result) => {
               this.$message({
                 type: 'success',
@@ -196,6 +215,7 @@ export default {
           }
           this.seatsdata = {}
           this.dialogVisible = false
+          this.activeName = 'first'
         })
         .catch((_) => {
           this.dialogVisible = false
@@ -203,7 +223,22 @@ export default {
           this.$message({
             message: '放弃保存并离开页面'
           })
+          this.activeName = 'first'
         })
+    },
+    // 计算菜单详情表总价
+    getSummaries(param) {
+      const { data } = param
+      const sum = []
+      const sums = []
+      data.map((item) => {
+        sum.push(item.number * item.price)
+      })
+      const s = sum.reduce((acc, cur) => acc + cur, 0)
+      sums[0] = '总价'
+      sums[2] = s
+      this.menu.total = s
+      return sums
     },
     async addmenu() {
       console.log(1)

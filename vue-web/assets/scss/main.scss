@@ -1,0 +1,45 @@
+@import './variables.scss';
+@import './mixin.scss';
+// @import '~/vuetify/src/dist/vuetify.min.css';
+@import url('https://fonts.googleapis.com/css?family=Hind+Siliguri');
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+
+// font
+html {
+  font-size: 20px;
+  background: $html-bg-color;
+  font-family: 'Merriweather ', 'Source+Sans+Pro', sans-serif;
+  // 结合下面的滚动条部分
+  scrollbar-color: rgba(255, 255, 255, 1) black;
+  scrollbar-width: thin;
+}
+
+// font-color/bg-color ex: .happy-primary-color{ color: #fff }
+@each $key, $color in $colors {
+  .fs-#{$key} {
+    color: $color;
+  }
+  .bg-#{$key} {
+    background-color: $color;
+  }
+}
+
+// font-size
+@each $key, $size in $font-size {
+  .fs-#{$key} {
+    font-size: $size * $base-font-size;
+  }
+}
+
+// nuxt 提供的 page transition 效果
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease;
+}
+.page-enter {
+  transform: translateX(-50px);
+}
+.page-leave-active {
+  // opacity: 0;
+  transform: translateX(50px);
+}
